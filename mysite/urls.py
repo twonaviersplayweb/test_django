@@ -23,4 +23,6 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^test/$', views.test),
     url(r'^index.*/', views.index),
+    url(r'^user_data.*/', views.data),
+    url(r'^setting.*/', views.setting),
 ]

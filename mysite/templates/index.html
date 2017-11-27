@@ -1,3 +1,4 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html>
 
@@ -6,16 +7,25 @@
     <title>Exmon</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- CSS Libs -->
-    <link rel="stylesheet" type="text/css" href="../lib/css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="../lib/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'lib/css/font-awesome.min.css' %}">
 
     <!-- CSS App -->
-    <link rel="stylesheet" type="text/css" href="../css/style.css">
-    <link rel="stylesheet" type="text/css" href="../css/themes/flat-blue.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/themes/flat-blue.css' %}">
+    <script type="text/javascript" src="{% static 'lib/js/vue.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/js/Chart.min.js' %}"></script>
+    <style >
+        .chart-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+        }
+    </style>
 </head>
 
-<body class="flat-blue">
-    <div class="app-container">
+<body class="flat-blue" >
+    <div class="app-container" id="myapp">
         <div class="row content-container">
             <nav class="navbar navbar-default navbar-fixed-top navbar-top">
                 <div class="container-fluid">
@@ -81,13 +91,13 @@
                 <div class="side-body padding-top">
                     <div class="row">
                         <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
-                            <a href="#">
+                            <a href="#" @click="show('status')">
                                 <div class="card red summary-inline">
                                     <div class="card-body">
-                                        <i class="icon fa fa-battery-three-quarters fa-4x"></i>
+                                        <i class="icon fa fa-bar-chart-o fa-4x"></i>
                                         <div class="content">
-                                            <div class="title">温度</div>
-                                            <div class="sub-title">tempreture</div>
+                                            <div class="title">状态</div>
+                                            <div class="sub-title">status</div>
                                         </div>
                                         <div class="clear-both"></div>
                                     </div>
@@ -95,13 +105,13 @@
                             </a>
                         </div>
                         <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
-                            <a href="#">
+                            <a href="#" @click="show('set')">
                                 <div class="card yellow summary-inline">
                                     <div class="card-body">
-                                        <i class="icon fa fa-flash fa-4x"></i>
+                                        <i class="icon fa fa-cog fa-4x"></i>
                                         <div class="content">
-                                            <div class="title">电压</div>
-                                            <div class="sub-title">voltage</div>
+                                            <div class="title">配置</div>
+                                            <div class="sub-title">setting</div>
                                         </div>
                                         <div class="clear-both"></div>
                                     </div>
@@ -109,13 +119,13 @@
                             </a>
                         </div>
                         <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
-                            <a href="#">
+                            <a href="#" @click="show('time')">
                                 <div class="card green summary-inline">
                                     <div class="card-body">
-                                        <i class="icon fa fa-television fa-4x"></i>
+                                        <i class="icon fa fa-clock-o fa-4x"></i>
                                         <div class="content">
-                                            <div class="title">KVM</div>
-                                            <div class="sub-title">KVM</div>
+                                            <div class="title">时间</div>
+                                            <div class="sub-title">time</div>
                                         </div>
                                         <div class="clear-both"></div>
                                     </div>
@@ -123,13 +133,13 @@
                             </a>
                         </div>
                         <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
-                            <a href="#">
+                            <a href="#" @click="show('user')">
                                 <div class="card blue summary-inline">
                                     <div class="card-body">
-                                        <i class="icon fa fa-terminal fa-4x"></i>
+                                        <i class="icon fa fa-address-book fa-4x"></i>
                                         <div class="content">
-                                            <div class="title">SOL</div>
-                                            <div class="sub-title">SOL</div>
+                                            <div class="title">用户</div>
+                                            <div class="sub-title">user</div>
                                         </div>
                                         <div class="clear-both"></div>
                                     </div>
@@ -137,7 +147,143 @@
                             </a>
                         </div>
                     </div>
+                    <div v-show=isShowSetting>
+                        <div class="row" >
+                            <div class=" col-xs-3">
+                                <div class="form-group">
+                                    <label >RULE NUMBER</label>
+                                    <input type="text" class="form-control" aria-label="..." placeholder="配置规则index(0-31)" v-model="ip_num">
+                                </div><!-- /form-group -->
+                            </div><!-- /.col-lg-6 -->
+                            <div class=" col-xs-3">
+                                <div class="form-group">
+                                    <label >SIP1</label>
+                                    <input type="text" class="form-control" aria-label="..." placeholder="配置IP DATA (SIP[015:000])" v-model="sip1">
+                                </div><!-- /form-group -->
+                            </div><!-- /.col-lg-6 -->
+                            <div class=" col-xs-3">
+                                <div class="form-group">
+                                    <label >SIP2</label>
+                                    <input type="text" class="form-control" aria-label="..." placeholder="配置IP DATA (SIP[031:016]" v-model="sip2">
+                                </div><!-- /form-group -->
+                            </div><!-- /.col-lg-6 -->
+                            <div class=" col-xs-3">
+                                <div class="form-group">
+                                    <label >DIP1</label>
+                                    <input type="text" class="form-control" aria-label="..." placeholder="配置IP DATA (DIP[015:000])" v-model="dip1">
+                                </div><!-- /form-group -->
+                            </div><!-- /.col-lg-6 -->
+                        </div><!-- /.row -->
+                        <div class="row">
+                            <div class=" col-xs-3">
+                                <div class="form-group">
+                                    <label >DIP2</label>
+                                    <input type="text" class="form-control" aria-label="..." placeholder="配置IP DATA (DIP[031:016])" v-model="dip2">
+                                </div><!-- /form-group -->
+                            </div><!-- /.col-lg-6 -->
+                            <div class=" col-xs-3">
+                                <div class="form-group">
+                                    <label >SPORT</label>
+                                    <input type="text" class="form-control" aria-label="..." placeholder="配置IP DATA (SPORT)" v-model="ip_sport">
+                                </div><!-- /form-group -->
+                            </div><!-- /.col-lg-6 -->
+                            <div class=" col-xs-3">
+                                <div class="form-group">
+                                    <label >DPORT</label>
+                                    <input type="text" class="form-control" aria-label="..." placeholder="配置IP DATA (DPORT)" v-model="ip_dport">
+                                </div><!-- /form-group -->
+                            </div><!-- /.col-lg-6 -->
+                            <div class=" col-xs-3">
+                                <div class="form-group">
+                                    <label >PROTOCOL</label>
+                                    <input type="text" class="form-control" aria-label="..." placeholder="配置IP DATA (bit7-0:Protocol)" v-model="ip_proto">
+                                </div><!-- /form-group -->
+                            </div><!-- /.col-lg-6 -->
+                        </div><!-- /.row -->
+                        <div class="row">
+                            <div class=" col-xs-3">
+                                <div class="form-group">
+                                    <label >MASK SIP1</label>
+                                    <input type="text" class="form-control" aria-label="..." placeholder="配置IP MASK (SIP[015:000]) Mask配置" v-model="mask_sip1">
+                                </div><!-- /form-group -->
+                            </div><!-- /.col-lg-6 -->
+                            <div class=" col-xs-3">
+                                <div class="form-group">
+                                    <label >MASK SIP2</label>
+                                    <input type="text" class="form-control" aria-label="..." placeholder="配置IP MASK (SIP[031:016])	1: Masked/0:Not Masked" v-model="mask_sip2">
+                                </div><!-- /form-group -->
+                            </div><!-- /.col-lg-6 -->
+                            <div class=" col-xs-3">
+                                <div class="form-group">
+                                    <label >MASK DIP1</label>
+                                    <input type="text" class="form-control" aria-label="..." placeholder="配置IP MASK (DIP[015:000])" v-model="mask_dip1">
+                                </div><!-- /form-group -->
+                            </div><!-- /.col-lg-6 -->
+                            <div class=" col-xs-3">
+                                <div class="form-group">
+                                    <label >MASK DIP2</label>
+                                    <input type="text" class="form-control" aria-label="..." placeholder="配置IP MASK (DIP[031:016])" v-model="mask_dip2">
+                                </div><!-- /form-group -->
+                            </div><!-- /.col-lg-6 -->
+                        </div><!-- /.row -->
+                        <div class="row">
+                            <div class=" col-xs-3">
+                                <div class="form-group">
+                                    <label >IP MASK PROTOCOL</label>
+                                    <input type="text" class="form-control" aria-label="..." placeholder="配置IP MASK (Protocol(bit2) / Dport (bit1) /Sport (bit0) )" v-model="mask_proto">
+                                </div><!-- /form-group -->
+                            </div><!-- /.col-lg-6 -->
+                            <div class=" col-xs-3">
+                                <div class="form-group">
+                                    <label >ACTID</label>
+                                    <input type="text" class="form-control" aria-label="..." placeholder="配置ACTID" v-model="actid">
+                                </div><!-- /form-group -->
+                            </div><!-- /.col-lg-6 -->
+                            <div class=" col-xs-3">
+                                <div class="form-group">
+                                    <label >ACTION NUMBER</label>
+                                    <input type="text" class="form-control" aria-label="..." placeholder="Action Num(0/31保留，默认从1开始使用，最大30）" v-model="action_num">
+                                </div><!-- /form-group -->
+                            </div><!-- /.col-lg-6 -->
+                            <div class=" col-xs-3">
+                                <div class="form-group">
+                                    <label >VLAN TABLE NUMBER</label>
+                                    <input type="text" class="form-control" aria-label="..." placeholder="VLAN Table Number（每个Action使用1个转发表）" v-model="vlan_table_num">
+                                </div><!-- /form-group -->
+                            </div><!-- /.col-lg-6 -->
+                        </div><!-- /.row -->
+                        <button id="submitsetting" type="button" class="btn btn-default pull-right" @click="submitsetting">sumbit</button>
+
+                    </div>
+                    <div class="row" v-show=isShowStatus>
+                        <div class="col-md-4 col-sm-6 col-xs-12" >
+                            <div class="col-md-4" >
+                                <h4>cpu 占用率</h4>
+                            </div>
+                            <div class="col-md-8 " >
+                                <canvas id="myChart" width="100" height="100"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6 col-xs-12" >
+                            <div class="col-md-4" >
+                                <h4>内存 使用率</h4>
+                            </div>
+                            <div class="col-md-8 " >
+                                <canvas id="myChart1" width="100" height="100"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col-sm-6 col-xs-12" >
+                            <div class="col-md-4" >
+                                <h4>速率</h4>
+                            </div>
+                            <div class="col-md-8 " >
+                                <canvas id="myChart2" width="100" height="100"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
+
             </div>
         </div>
         <footer class="app-footer">
@@ -147,13 +293,17 @@
         </footer>
         <div>
             <!-- Javascript Libs -->
-            <script type="text/javascript" src="../lib/js/jquery.min.js"></script>
-            <script type="text/javascript" src="../lib/js/bootstrap.min.js"></script>
+            <script type="text/javascript" src="{% static 'lib/js/jquery.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'lib/js/bootstrap.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'lib/js/axios.min.js' %}"></script>
+
             <!-- Javascript -->
-            <script type="text/javascript" src="../js/app.js"></script>
-            <script type="text/javascript" src="../js/index.js"></script>
+            <script type="text/javascript" src="{% static 'js/app.js' %}"></script>
+            <script type="text/javascript" src="{% static 'js/index.js' %}"></script>
+
         </div>
     </div>
+    <script type="text/javascript" src="{% static 'js/webchart.js' %}"></script>
 </body>
 
 </html>
