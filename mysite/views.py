@@ -21,8 +21,8 @@ def data(request):
     cpu_rate = os.popen(cmd).read()
     cmd = '/var/web/mem_per.sh'
     mem_rate = os.popen(cmd).read()
-    resp['cpu_rate'] = int(cpu_rate)
-    resp['mem_rate'] = int(mem_rate)
+    resp['cpu_rate'] = float(cpu_rate)
+    resp['mem_rate'] = float(mem_rate)
     return HttpResponse(json.dumps(resp), content_type="application/json")
 
 

@@ -133,9 +133,10 @@ var ctx2 = document.getElementById("myChart2");
 function getinfo() {
     axios.get('/user_data/')
         .then(function (response) {
-            var pie_data_cpu = [response.cpu_rate, 100 - response.cpu_rate];
-            var pie_data_mem = [response.mem_rate, 100 - response.mem_rate];
-            var pie_data_speed = [response.speed, 100 - response.speed];
+            var pie_data_cpu = [response.data.cpu_rate, 100 - response.data.cpu_rate];
+            var pie_data_mem = [response.data.mem_rate, 100 - response.data.mem_rate];
+            var pie_data_speed = [response.data.speed, 100 - response.data.speed];
+
             paniting(ctx, pie_data_cpu);
             paniting(ctx1, pie_data_mem);
             paniting(ctx2, pie_data_speed);
